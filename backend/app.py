@@ -13,6 +13,12 @@ classes = ["chain_early","chain_mid","chain_late","seat_early","seat_mid","seat_
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    file = request.files['file']
+    result = predict_degradation(file)  # 既存関数
+    return jsonify({'result': result})
+    
     img_bytes = request.files["file"].read()
     img = Image.open(io.BytesIO(img_bytes)).resize((224,224))
     img = np.array(img)/255.0
@@ -37,4 +43,5 @@ def home():
     return "劣化予測のAPIが実行中です！"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)  #Renderのポートは自動で環境変数PORTになる場合もあるため注意！が必要らしい
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
