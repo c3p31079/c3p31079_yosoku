@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
 
-MODEL_PATH = "models/degradation_model.h5"
+MODEL_PATH = "swing_degradation_model.h5"
 DATA_LOG = "data/degradation_log.csv"
 PLOT_PATH = "static/graph.png"
 
