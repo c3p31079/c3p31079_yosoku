@@ -1,55 +1,77 @@
-import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from degradation_predictor import predict_replacement_time
+import io
+import os
 
-# Flask 初期化
 app = Flask(__name__)
 CORS(app)
 
-# モデルロード（起動時に一度だけ）
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "swing_degradation_model.h5")
-model = tf.keras.models.load_model(MODEL_PATH)
+# モデル読み込み
+MODEL_PATH = "swing_degradation_model.h5"
+if os.path.exists(MODEL_PATH):
+    model = tf.keras.models.load_model(MODEL_PATH)
+    print("✅ モデル読み込み成功:", MODEL_PATH)
+else:
+    raise FileNotFoundError(f"❌ モデルファイルが見つかりません: {MODEL_PATH}")
 
-classes = ["chain_early","chain_mid","chain_late","seat_early","seat_mid","seat_late"]
+# クラス名
+CLASS_NAMES = ["chain_early", "chain_mid", "chain_late"]
 
-# 画像から劣化分類＋交換時期推定
-@app.route("/predict", methods=["POST"])
-def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-
-    file = request.files['file']
-    try:
-        img = Image.open(file).convert("RGB").resize((224,224))
-        img_array = np.array(img)/255.0
-        img_array = np.expand_dims(img_array, axis=0)
-
-        # 推論
-        pred = model.predict(img_array)[0]
-        cls = classes[np.argmax(pred)]
-        score = float(np.max(pred))
-
-        # 交換時期推定
-        months_left, suggestion = predict_replacement_time(cls, score)
-
-        return jsonify({
-            "class": cls,
-            "score": round(score, 3),
-            "predicted_months_left": months_left,
-            "suggestion": suggestion
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+# 月数設定（必要に応じて調整可）
+RECOMMENDATION_MONTHS = {
+    "chain_early": 3,
+    "chain_mid": 6,
+    "chain_late": 0
+}
 
 @app.route("/")
 def home():
-    return "劣化予測のAPIが実行中です！"
+    return "Swing degradation prediction API is running."
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    if "file" not in request.files:
+        return jsonify({"error": "No image file provided."}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename."}), 400
+
+    try:
+        # 画像の読み込み
+        image = Image.open(io.BytesIO(file.read()))
+        image = image.convert("RGB")
+        image = image.resize((128, 128))
+        img_array = np.array(image) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
+
+        # 推論
+        predictions = model.predict(img_array)
+        predicted_index = np.argmax(predictions[0])
+        predicted_label = CLASS_NAMES[predicted_index]
+
+        # 推奨月数の取得
+        months = RECOMMENDATION_MONTHS.get(predicted_label, None)
+        if months is None:
+            recommendation = "推奨時期を特定できません。"
+        elif months == 0:
+            recommendation = "すぐに交換を推奨します。"
+        else:
+            recommendation = f"{months}か月後の交換を推奨します。"
+
+        return jsonify({
+            "predicted_label": predicted_label,
+            "confidence": float(np.max(predictions[0])),
+            "recommendation": recommendation
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
