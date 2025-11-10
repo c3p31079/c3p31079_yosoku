@@ -8,7 +8,8 @@ async function send() {
   const formData = new FormData();
   formData.append("file", file);
 
-  const API_URL = "https://your-render-app-name.onrender.com/predict"; // ← RenderのURLに置き換える
+  // ✅ あなたのRenderのURLを指定
+  const API_URL = "https://c3p31079-yosoku.onrender.com/predict";
 
   document.getElementById("loading").style.display = "block";
   document.getElementById("result").innerHTML = "";
