@@ -36,5 +36,5 @@ def predict():
 def home():
     return "劣化予測のAPIが実行中です！"
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)  #Renderのポートは自動で環境変数PORTになる場合もあるため注意！が必要らしい
