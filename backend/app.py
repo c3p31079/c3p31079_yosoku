@@ -11,7 +11,9 @@ app = Flask(__name__)
 CORS(app, origins="*")  # GitHub Pages からアクセス可能に
 
 # モデルロード
-model = tf.keras.models.load_model("swing_degradation_model.h5")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "swing_degradation_model.h5")
+model = tf.keras.models.load_model(MODEL_PATH)
 classes = ["chain_early","chain_mid","chain_late","seat_early","seat_mid","seat_late"]
 
 # 仮の交換時期関数
