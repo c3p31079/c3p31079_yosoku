@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import os
 import io
 from degradation_predictor import predict_replacement_time
 from flask_cors import CORS
@@ -20,7 +21,7 @@ def predict():
 
     # 画像前処理
     img_bytes = file.read()
-    img = Image.open(io.BytesIO(img_bytes)).resize((224,224))
+    img = Image.open(io.BytesIO(img_bytes)).resize((128,128))
     img = np.array(img)/255.0
     img = np.expand_dims(img, axis=0)
 
