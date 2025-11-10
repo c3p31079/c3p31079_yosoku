@@ -1,32 +1,44 @@
 async function send() {
   const file = document.getElementById("fileInput").files[0];
-  if (!file) { alert("画像を選択してください"); return; }
+  if (!file) {
+    alert("画像を選択してください。");
+    return;
+  }
 
   const formData = new FormData();
   formData.append("file", file);
 
-  const API_URL = "https://あなたのRenderURL/predict"; // 実際のURLに置き換え
+  const API_URL = "https://your-render-app-name.onrender.com/predict"; // ← RenderのURLに置き換える
+
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("result").innerHTML = "";
 
   try {
     const res = await fetch(API_URL, {
-      method: 'POST',
+      method: "POST",
       body: formData
     });
-    const data = await res.json();
 
-    if(data.error){
-      alert("Error: " + data.error);
-      return;
+    if (!res.ok) {
+      throw new Error("サーバーエラー: " + res.status);
     }
 
-    document.getElementById("result").innerHTML = `
-      <h3>結果</h3>
-      <p>分類: ${data.class}</p>
-      <p>スコア: ${(data.score*100).toFixed(1)}%</p>
-      <p>予測残寿命: ${data.predicted_months_left}ヶ月</p>
-      <p>${data.suggestion}</p>
-    `;
+    const data = await res.json();
+    document.getElementById("loading").style.display = "none";
+
+    if (data.error) {
+      document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
+    } else {
+      document.getElementById("result").innerHTML = `
+        <h3>判定結果</h3>
+        <p>分類: <b>${data.predicted_label}</b></p>
+        <p>確信度: ${(data.confidence * 100).toFixed(1)}%</p>
+        <p>${data.recommendation}</p>
+      `;
+    }
+
   } catch (err) {
-    alert("通信エラー: " + err);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("result").innerHTML = `<p style="color:red;">通信エラー: ${err.message}</p>`;
   }
 }
