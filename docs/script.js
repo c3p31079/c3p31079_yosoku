@@ -5,9 +5,11 @@ async function send() {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch('https://c3p31079-yosoku.onrender.com/predict', {
-    method: "POST",
-    body: formData
+  const API_URL = "https://あなたのRenderURL/predict";
+  
+  const res = await fetch(API_URL, {
+      method: 'POST',
+      body: formData
   });
   const data = await res.json();
 
