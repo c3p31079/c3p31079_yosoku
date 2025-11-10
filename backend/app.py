@@ -10,7 +10,8 @@ app = Flask(__name__)
 CORS(app)
 
 #モデル読み込み
-MODEL_PATH = "swing_degradation_model.h5"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "swing_degradation_model.h5")
 if os.path.exists(MODEL_PATH):
     model = tf.keras.models.load_model(MODEL_PATH)
     print(f"✅ モデル読み込み成功: {MODEL_PATH}")
