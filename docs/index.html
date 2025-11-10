@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ブランコ劣化予測</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>遊具劣化予測AI</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>ブランコ劣化予測</h1>
-  <input type="file" id="fileInput">
-  <button onclick="send()">判定</button>
-  <div id="result"></div>
+  <div class="container">
+    <h1>遊具劣化予測AI</h1>
+
+    <input type="file" id="fileInput" accept="image/*" />
+    <button onclick="send()">判定する</button>
+
+    <div id="loading" style="display:none;">判定中です...</div>
+    <div id="result"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>
