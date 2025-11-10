@@ -15,20 +15,21 @@ classes = ["chain_early","chain_mid","chain_late","seat_early","seat_mid","seat_
 def predict():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
+
     file = request.files['file']
-    result = predict_degradation(file)  # 既存関数
-    return jsonify({'result': result})
-    
-    img_bytes = request.files["file"].read()
+
+    # 画像前処理
+    img_bytes = file.read()
     img = Image.open(io.BytesIO(img_bytes)).resize((224,224))
     img = np.array(img)/255.0
     img = np.expand_dims(img, axis=0)
 
+    # モデル推論
     pred = model.predict(img)[0]
     cls = classes[np.argmax(pred)]
     score = float(np.max(pred))
 
-    #劣化スコアから交換時期を推定
+    # 劣化スコアから交換時期を推定
     months_left, suggestion = predict_replacement_time(cls, score)
 
     return jsonify({
