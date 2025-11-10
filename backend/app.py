@@ -4,8 +4,10 @@ import numpy as np
 from PIL import Image
 import io
 from degradation_predictor import predict_replacement_time
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 model = tf.keras.models.load_model("swing_degradation_model.h5")
 classes = ["chain_early","chain_mid","chain_late","seat_early","seat_mid","seat_late"]
 
