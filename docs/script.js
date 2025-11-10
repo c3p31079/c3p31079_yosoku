@@ -5,7 +5,7 @@ async function send() {
   const formData = new FormData();
   formData.append("file", file);
 
-  const API_URL = "https://あなたのRenderURL/predict";
+  const API_URL = "https://あなたのRenderURL/predict"; // 実際のURLに置き換え
 
   try {
     const res = await fetch(API_URL, {
