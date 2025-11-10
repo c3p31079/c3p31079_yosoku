@@ -20,10 +20,10 @@ else:
 # クラス名
 CLASS_NAMES = ["chain_early", "chain_mid", "chain_late"]
 
-# 月数設定（必要に応じて調整可）
+# 推奨交換時期（例）
 RECOMMENDATION_MONTHS = {
-    "chain_early": 3,
-    "chain_mid": 6,
+    "chain_early": 6,
+    "chain_mid": 3,
     "chain_late": 0
 }
 
@@ -41,7 +41,7 @@ def predict():
         return jsonify({"error": "Empty filename."}), 400
 
     try:
-        # 画像の読み込み
+        # 画像を読み込み・前処理（128×128に統一）
         image = Image.open(io.BytesIO(file.read()))
         image = image.convert("RGB")
         image = image.resize((128, 128))
@@ -52,8 +52,9 @@ def predict():
         predictions = model.predict(img_array)
         predicted_index = np.argmax(predictions[0])
         predicted_label = CLASS_NAMES[predicted_index]
+        confidence = float(np.max(predictions[0]))
 
-        # 推奨月数の取得
+        # 交換時期メッセージ
         months = RECOMMENDATION_MONTHS.get(predicted_label, None)
         if months is None:
             recommendation = "推奨時期を特定できません。"
@@ -64,7 +65,7 @@ def predict():
 
         return jsonify({
             "predicted_label": predicted_label,
-            "confidence": float(np.max(predictions[0])),
+            "confidence": round(confidence, 3),
             "recommendation": recommendation
         })
 
@@ -73,5 +74,5 @@ def predict():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
