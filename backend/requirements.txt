@@ -1,6 +1,8 @@
-flask
+Flask
 tensorflow
-pillow
 numpy
+pillow
+opencv-python
+gunicorn
 scikit-learn
 pandas
